@@ -1,10 +1,27 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import BlogPost
 from .forms import BlogPostForm
+from django.db.models import Q
+from django.core.paginator import Paginator
 
 def post_list(request):
-    posts = BlogPost.objects.all().order_by('-created_at')
-    return render(request, 'blog/post_list.html', {'posts': posts})
+    query = request.GET.get('q')
+
+    if query:
+        posts = BlogPost.objects.filter(
+            Q(title__icontains=query) |
+            Q(content__icontains=query)
+        ).order_by('-created_at')
+    else:
+        posts = BlogPost.objects.all().order_by('-created_at')
+    paginator = Paginator(posts, 5) 
+    page_number = request.GET.get('page')
+    posts = paginator.get_page(page_number)
+
+    return render(request, 'blog/post_list.html', {
+        'posts': posts,
+        'query': query
+    })
 
 def post_detail(request, id):
     post = get_object_or_404(BlogPost, id=id)
