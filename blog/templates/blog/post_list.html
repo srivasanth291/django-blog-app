@@ -28,8 +28,12 @@
         <p>{{ post.content|truncatewords:20 }}</p>
       </div>
       <div class="card-footer text-muted">
-        {{post.author_name}} | {{ post.created_at }}
-      </div>
+  {{ post.author_name }}
+  {% if post.category %}
+    | <span class="badge bg-secondary">{{ post.category.name }}</span>
+  {% endif %}
+  | {{ post.created_at }}
+</div>
     </div>
   </div>
 {% empty %}

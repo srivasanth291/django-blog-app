@@ -5,7 +5,15 @@
 <div class="card">
   <div class="card-body">
     <h2>{{ post.title }}</h2>
-    <p class="text-muted">{{ post.created_at }}</p>
+
+    <p class="text-muted">
+      By {{ post.author_name }}
+      {% if post.category %}
+        | Category: <span class="badge bg-secondary">{{ post.category.name }}</span>
+      {% endif %}
+      | {{ post.created_at }}
+    </p>
+
     <p>{{ post.content }}</p>
 
     <a href="{% url 'post_update' post.id %}" class="btn btn-warning btn-sm">Edit</a>
