@@ -1,8 +1,15 @@
 from django.db import models
+from django.utils.text import slugify
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=120, unique=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -13,11 +20,10 @@ class BlogPost(models.Model):
     content = models.TextField()
     author_name = models.CharField(max_length=100)
     category = models.ForeignKey(
-    Category,
-    on_delete=models.CASCADE,
-    related_name='posts'
+        Category,
+        on_delete=models.CASCADE,
+        related_name='posts'
     )
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

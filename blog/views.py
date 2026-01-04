@@ -1,31 +1,54 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import BlogPost
+from .models import BlogPost, Category
 from .forms import BlogPostForm
 from django.db.models import Q
 from django.core.paginator import Paginator
 
+
 def post_list(request):
     query = request.GET.get('q')
+    posts_queryset = BlogPost.objects.all().order_by('-created_at')
 
     if query:
-        posts = BlogPost.objects.filter(
+        posts_queryset = posts_queryset.filter(
             Q(title__icontains=query) |
             Q(content__icontains=query)
-        ).order_by('-created_at')
-    else:
-        posts = BlogPost.objects.all().order_by('-created_at')
-    paginator = Paginator(posts, 5) 
+        )
+
+    paginator = Paginator(posts_queryset, 5)
     page_number = request.GET.get('page')
     posts = paginator.get_page(page_number)
 
+    categories = Category.objects.all()
+
     return render(request, 'blog/post_list.html', {
         'posts': posts,
-        'query': query
+        'query': query,
+        'categories': categories
     })
+
+
+def posts_by_category(request, slug):
+    category = get_object_or_404(Category, slug=slug)
+    posts_queryset = category.posts.all().order_by('-created_at')
+
+    paginator = Paginator(posts_queryset, 5)
+    page_number = request.GET.get('page')
+    posts = paginator.get_page(page_number)
+
+    categories = Category.objects.all()
+
+    return render(request, 'blog/post_list.html', {
+        'posts': posts,
+        'current_category': category,
+        'categories': categories
+    })
+
 
 def post_detail(request, id):
     post = get_object_or_404(BlogPost, id=id)
     return render(request, 'blog/post_detail.html', {'post': post})
+
 
 def post_create(request):
     if request.method == 'POST':
@@ -37,6 +60,7 @@ def post_create(request):
         form = BlogPostForm()
     return render(request, 'blog/post_form.html', {'form': form})
 
+
 def post_update(request, id):
     post = get_object_or_404(BlogPost, id=id)
     if request.method == 'POST':
@@ -47,6 +71,7 @@ def post_update(request, id):
     else:
         form = BlogPostForm(instance=post)
     return render(request, 'blog/post_form.html', {'form': form})
+
 
 def post_delete(request, id):
     post = get_object_or_404(BlogPost, id=id)

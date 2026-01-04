@@ -1,70 +1,45 @@
 {% extends 'blog/base.html' %}
-{% block title %}All Posts{% endblock %}
+{% block title %}Blog{% endblock %}
 
 {% block content %}
-<form method="get" class="mb-4">
-  <div class="input-group">
-    <input
-      type="text"
-      name="q"
-      class="form-control"
-      placeholder="Search posts..."
-      value="{{ query|default:'' }}"
-    >
-    <button class="btn btn-primary">Search</button>
-  </div>
-</form>
 
-<h2>All Blog Posts</h2>
+<h2>
+  {% if current_category %}
+    Posts in "{{ current_category.name }}"
+  {% else %}
+    All Blog Posts
+  {% endif %}
+</h2>
+
+<div class="mb-3">
+  <strong>Categories:</strong>
+  {% for cat in categories %}
+    <a href="{% url 'posts_by_category' cat.slug %}" class="badge bg-info text-dark me-1">
+      {{ cat.name }}
+    </a>
+  {% endfor %}
+</div>
 
 <div class="row">
-{% for post in posts %}
-  <div class="col-md-4 mb-3">
-    <div class="card h-100">
-      <div class="card-body">
-        <h5>
-          <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
-        </h5>
-        <p>{{ post.content|truncatewords:20 }}</p>
+  {% for post in posts %}
+    <div class="col-md-4 mb-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5>
+            <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
+          </h5>
+          <p>{{ post.content|truncatewords:20 }}</p>
+        </div>
+        <div class="card-footer text-muted">
+          {{ post.author_name }} |
+          <span class="badge bg-secondary">{{ post.category.name }}</span> |
+          {{ post.created_at }}
+        </div>
       </div>
-      <div class="card-footer text-muted">
-  {{ post.author_name }}
-  {% if post.category %}
-    | <span class="badge bg-secondary">{{ post.category.name }}</span>
-  {% endif %}
-  | {{ post.created_at }}
-</div>
     </div>
-  </div>
-{% empty %}
-<p>No posts yet</p>
-{% endfor %}
-<nav aria-label="Page navigation">
-  <ul class="pagination justify-content-center">
-
-    {% if posts.has_previous %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ posts.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">
-          Previous
-        </a>
-      </li>
-    {% endif %}
-
-    <li class="page-item disabled">
-      <span class="page-link">
-        Page {{ posts.number }} of {{ posts.paginator.num_pages }}
-      </span>
-    </li>
-
-    {% if posts.has_next %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ posts.next_page_number }}{% if query %}&q={{ query }}{% endif %}">
-          Next
-        </a>
-      </li>
-    {% endif %}
-
-  </ul>
-</nav>
+  {% empty %}
+    <p>No posts found.</p>
+  {% endfor %}
 </div>
+
 {% endblock %}
