@@ -3,43 +3,124 @@
 
 {% block content %}
 
-<h2>
-  {% if current_category %}
-    Posts in "{{ current_category.name }}"
-  {% else %}
-    All Blog Posts
-  {% endif %}
-</h2>
-
-<div class="mb-3">
-  <strong>Categories:</strong>
-  {% for cat in categories %}
-    <a href="{% url 'posts_by_category' cat.slug %}" class="badge bg-info text-dark me-1">
-      {{ cat.name }}
-    </a>
-  {% endfor %}
-</div>
-
 <div class="row">
-  {% for post in posts %}
-    <div class="col-md-4 mb-3">
-      <div class="card h-100">
-        <div class="card-body">
-          <h5>
-            <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
-          </h5>
-          <p>{{ post.content|truncatewords:20 }}</p>
-        </div>
-        <div class="card-footer text-muted">
-          {{ post.author_name }} |
-          <span class="badge bg-secondary">{{ post.category.name }}</span> |
-          {{ post.created_at }}
-        </div>
+
+  <!-- SIDEBAR -->
+  <div class="col-md-3">
+    <div class="card mb-4">
+      <div class="card-header fw-bold">
+        Categories
       </div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+          <a href="{% url 'post_list' %}"
+             class="{% if not current_category %}fw-bold text-primary{% endif %}">
+            All Posts
+          </a>
+        </li>
+        {% for cat in categories %}
+          <li class="list-group-item">
+            <a href="{% url 'posts_by_category' cat.slug %}"
+               class="{% if current_category and current_category.id == cat.id %}fw-bold text-primary{% endif %}">
+              {{ cat.name }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
     </div>
-  {% empty %}
-    <p>No posts found.</p>
-  {% endfor %}
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="col-md-9">
+
+    <h2 class="mb-4">
+      {% if current_category %}
+        {{ current_category.name }} Posts
+      {% else %}
+        All Blog Posts
+      {% endif %}
+    </h2>
+
+    <div class="row">
+      {% for post in posts %}
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">
+                <a href="{% url 'post_detail' post.id %}"
+                   class="text-decoration-none">
+                  {{ post.title }}
+                </a>
+              </h5>
+              <p class="card-text">
+                {{ post.content|truncatewords:18 }}
+              </p>
+            </div>
+            <div class="card-footer text-muted small">
+              {{ post.author_name }} <br>
+              <span class="badge bg-secondary">
+                {{ post.category.name }}
+              </span>
+              · {{ post.created_at|date:"M d, Y" }}
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <p>No posts found.</p>
+      {% endfor %}
+    </div>
+
+    <!-- PAGINATION -->
+    {% if posts.has_other_pages %}
+    <nav>
+      <ul class="pagination justify-content-center">
+
+        {% if posts.has_previous %}
+          <li class="page-item">
+            <a class="page-link"
+               href="?page={{ posts.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">
+              Previous
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled">
+            <span class="page-link">Previous</span>
+          </li>
+        {% endif %}
+
+        {% for num in posts.paginator.page_range %}
+          {% if posts.number == num %}
+            <li class="page-item active">
+              <span class="page-link">{{ num }}</span>
+            </li>
+          {% else %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}">
+                {{ num }}
+              </a>
+            </li>
+          {% endif %}
+        {% endfor %}
+
+        {% if posts.has_next %}
+          <li class="page-item">
+            <a class="page-link"
+               href="?page={{ posts.next_page_number }}{% if query %}&q={{ query }}{% endif %}">
+              Next
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled">
+            <span class="page-link">Next</span>
+          </li>
+        {% endif %}
+
+      </ul>
+    </nav>
+    {% endif %}
+
+  </div>
 </div>
 
 {% endblock %}

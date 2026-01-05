@@ -1,7 +1,6 @@
 from django.db import models
 from django.utils.text import slugify
 
-
 class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=120, unique=True, blank=True)
@@ -13,7 +12,6 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
-
 
 class BlogPost(models.Model):
     title = models.CharField(max_length=200)

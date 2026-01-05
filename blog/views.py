@@ -4,51 +4,61 @@ from .forms import BlogPostForm
 from django.db.models import Q
 from django.core.paginator import Paginator
 
-
 def post_list(request):
     query = request.GET.get('q')
-    posts_queryset = BlogPost.objects.all().order_by('-created_at')
+    posts = BlogPost.objects.all().order_by('-created_at')
+    categories = Category.objects.all()
 
     if query:
-        posts_queryset = posts_queryset.filter(
+        posts = posts.filter(
             Q(title__icontains=query) |
             Q(content__icontains=query)
         )
 
-    paginator = Paginator(posts_queryset, 5)
+    paginator = Paginator(posts, 6)
     page_number = request.GET.get('page')
     posts = paginator.get_page(page_number)
 
-    categories = Category.objects.all()
-
     return render(request, 'blog/post_list.html', {
         'posts': posts,
-        'query': query,
-        'categories': categories
+        'categories': categories,
+        'current_category': None,
+        'query': query
     })
 
 
-def posts_by_category(request, slug):
-    category = get_object_or_404(Category, slug=slug)
-    posts_queryset = category.posts.all().order_by('-created_at')
 
-    paginator = Paginator(posts_queryset, 5)
-    page_number = request.GET.get('page')
-    posts = paginator.get_page(page_number)
+def posts_by_category(request, slug):
+    current_category = get_object_or_404(Category, slug=slug)
+    query = request.GET.get('q')
+
+    posts = BlogPost.objects.filter(
+        category=current_category
+    ).order_by('-created_at')
+
+    if query:
+        posts = posts.filter(
+            Q(title__icontains=query) |
+            Q(content__icontains=query)
+        )
 
     categories = Category.objects.all()
 
+    paginator = Paginator(posts, 6)
+    page_number = request.GET.get('page')
+    posts = paginator.get_page(page_number)
+
     return render(request, 'blog/post_list.html', {
         'posts': posts,
-        'current_category': category,
-        'categories': categories
+        'categories': categories,
+        'current_category': current_category,
+        'query': query
     })
 
 
 def post_detail(request, id):
     post = get_object_or_404(BlogPost, id=id)
     return render(request, 'blog/post_detail.html', {'post': post})
-
 
 def post_create(request):
     if request.method == 'POST':
@@ -59,7 +69,6 @@ def post_create(request):
     else:
         form = BlogPostForm()
     return render(request, 'blog/post_form.html', {'form': form})
-
 
 def post_update(request, id):
     post = get_object_or_404(BlogPost, id=id)
@@ -72,10 +81,20 @@ def post_update(request, id):
         form = BlogPostForm(instance=post)
     return render(request, 'blog/post_form.html', {'form': form})
 
-
 def post_delete(request, id):
     post = get_object_or_404(BlogPost, id=id)
     if request.method == 'POST':
         post.delete()
         return redirect('post_list')
     return render(request, 'blog/post_confirm_delete.html', {'post': post})
+
+from .models import Category
+
+def category_posts(request, slug):
+    category = get_object_or_404(Category, slug=slug)
+    posts = BlogPost.objects.filter(category=category).order_by('-created_at')
+
+    return render(request, 'blog/post_list.html', {
+        'posts': posts,
+        'category': category
+    })
