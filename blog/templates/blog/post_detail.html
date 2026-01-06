@@ -2,24 +2,51 @@
 {% block title %}{{ post.title }}{% endblock %}
 
 {% block content %}
-<div class="card">
-  <div class="card-body">
-    <h2>{{ post.title }}</h2>
 
-    <p class="text-muted">
-      By {{ post.author_name }}
+<div class="card shadow-sm">
+
+  <!-- 🔥 POST IMAGE -->
+  {% if post.image %}
+    <img src="{{ post.image.url }}"
+         class="card-img-top"
+         style="max-height:400px; object-fit:cover;"
+         alt="{{ post.title }}">
+  {% endif %}
+
+  <div class="card-body">
+
+    <h2 class="mb-2">{{ post.title }}</h2>
+
+    <p class="text-muted mb-3">
+      By <strong>{{ post.author_name }}</strong>
       {% if post.category %}
-        | Category: <span class="badge bg-secondary">{{ post.category.name }}</span>
+        | <span class="badge bg-secondary">{{ post.category.name }}</span>
       {% endif %}
-      | {{ post.created_at }}
+      | {{ post.created_at|date:"M d, Y" }}
     </p>
 
-    <p>{{ post.content }}</p>
+    <p class="fs-5">
+      {{ post.content|linebreaks }}
+    </p>
 
-    <a href="{% url 'post_update' post.id %}" class="btn btn-warning btn-sm">Edit</a>
-    <a href="{% url 'post_delete' post.id %}" class="btn btn-danger btn-sm">Delete</a>
+    <div class="mt-4">
+      <a href="{% url 'post_update' post.id %}"
+         class="btn btn-warning btn-sm">
+        Edit
+      </a>
+
+      <a href="{% url 'post_delete' post.id %}"
+         class="btn btn-danger btn-sm">
+        Delete
+      </a>
+
+      <a href="{% url 'post_list' %}"
+         class="btn btn-link btn-sm">
+        ⬅ Back
+      </a>
+    </div>
+
   </div>
 </div>
 
-<a href="{% url 'post_list' %}" class="btn btn-link mt-3">⬅ Back</a>
 {% endblock %}

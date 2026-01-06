@@ -1,13 +1,72 @@
 {% extends 'blog/base.html' %}
-{% block title %}Post Form{% endblock %}
+{% block title %}Create / Edit Post{% endblock %}
 
 {% block content %}
-<h2>Create / Edit Post</h2>
 
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button class="btn btn-primary">Save</button>
-  <a href="{% url 'post_list' %}" class="btn btn-secondary">Cancel</a>
-</form>
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-7">
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+
+        <h3 class="mb-4 text-center">
+          {% if form.instance.pk %}
+            ✏️ Edit Blog Post
+          {% else %}
+            📝 Create New Blog Post
+          {% endif %}
+        </h3>
+
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <!-- TITLE -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Title</label>
+            {{ form.title }}
+          </div>
+
+          <!-- CONTENT -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Content</label>
+            {{ form.content }}
+          </div>
+
+          <!-- AUTHOR -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Author Name</label>
+            {{ form.author_name }}
+          </div>
+
+          <!-- CATEGORY -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Category</label>
+            {{ form.category }}
+          </div>
+
+          <!-- IMAGE -->
+          <div class="mb-4">
+            <label class="form-label fw-bold">Featured Image</label>
+            {{ form.image }}
+          </div>
+
+          <!-- ACTION BUTTONS -->
+          <div class="d-flex justify-content-between">
+            <a href="{% url 'post_list' %}" class="btn btn-outline-secondary">
+              Cancel
+            </a>
+
+            <button type="submit" class="btn btn-primary px-4">
+              Save Post
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
 {% endblock %}

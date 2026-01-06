@@ -7,7 +7,7 @@
 
   <!-- SIDEBAR -->
   <div class="col-md-3">
-    <div class="card mb-4">
+    <div class="card mb-4 shadow-sm">
       <div class="card-header fw-bold">
         Categories
       </div>
@@ -33,6 +33,23 @@
   <!-- MAIN CONTENT -->
   <div class="col-md-9">
 
+    <!-- SEARCH BOX -->
+    <form method="get" class="mb-4">
+      <div class="input-group">
+        <input
+          type="text"
+          name="q"
+          class="form-control"
+          placeholder="Search posts..."
+          value="{{ query|default:'' }}"
+        >
+        <button class="btn btn-primary" type="submit">
+          Search
+        </button>
+      </div>
+    </form>
+
+    <!-- PAGE TITLE -->
     <h2 class="mb-4">
       {% if current_category %}
         {{ current_category.name }} Posts
@@ -41,10 +58,20 @@
       {% endif %}
     </h2>
 
+    <!-- POSTS GRID -->
     <div class="row">
       {% for post in posts %}
         <div class="col-md-6 col-lg-4 mb-4">
           <div class="card h-100 shadow-sm">
+
+            <!-- 🔥 IMAGE -->
+            {% if post.image %}
+              <img src="{{ post.image.url }}"
+                   class="card-img-top"
+                   style="height:200px; object-fit:cover;"
+                   alt="{{ post.title }}">
+            {% endif %}
+
             <div class="card-body">
               <h5 class="card-title">
                 <a href="{% url 'post_detail' post.id %}"
@@ -56,6 +83,7 @@
                 {{ post.content|truncatewords:18 }}
               </p>
             </div>
+
             <div class="card-footer text-muted small">
               {{ post.author_name }} <br>
               <span class="badge bg-secondary">

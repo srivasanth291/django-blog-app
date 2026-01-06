@@ -4,6 +4,7 @@ from .forms import BlogPostForm
 from django.db.models import Q
 from django.core.paginator import Paginator
 
+
 def post_list(request):
     query = request.GET.get('q')
     posts = BlogPost.objects.all().order_by('-created_at')
@@ -27,14 +28,11 @@ def post_list(request):
     })
 
 
-
 def posts_by_category(request, slug):
     current_category = get_object_or_404(Category, slug=slug)
     query = request.GET.get('q')
 
-    posts = BlogPost.objects.filter(
-        category=current_category
-    ).order_by('-created_at')
+    posts = BlogPost.objects.filter(category=current_category)
 
     if query:
         posts = posts.filter(
@@ -42,6 +40,7 @@ def posts_by_category(request, slug):
             Q(content__icontains=query)
         )
 
+    posts = posts.order_by('-created_at')
     categories = Category.objects.all()
 
     paginator = Paginator(posts, 6)
@@ -60,9 +59,11 @@ def post_detail(request, id):
     post = get_object_or_404(BlogPost, id=id)
     return render(request, 'blog/post_detail.html', {'post': post})
 
+
 def post_create(request):
     if request.method == 'POST':
-        form = BlogPostForm(request.POST)
+
+        form = BlogPostForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return redirect('post_list')
@@ -70,10 +71,12 @@ def post_create(request):
         form = BlogPostForm()
     return render(request, 'blog/post_form.html', {'form': form})
 
+
 def post_update(request, id):
     post = get_object_or_404(BlogPost, id=id)
     if request.method == 'POST':
-        form = BlogPostForm(request.POST, instance=post)
+
+        form = BlogPostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
             form.save()
             return redirect('post_detail', id=post.id)
@@ -81,20 +84,10 @@ def post_update(request, id):
         form = BlogPostForm(instance=post)
     return render(request, 'blog/post_form.html', {'form': form})
 
+
 def post_delete(request, id):
     post = get_object_or_404(BlogPost, id=id)
     if request.method == 'POST':
         post.delete()
         return redirect('post_list')
     return render(request, 'blog/post_confirm_delete.html', {'post': post})
-
-from .models import Category
-
-def category_posts(request, slug):
-    category = get_object_or_404(Category, slug=slug)
-    posts = BlogPost.objects.filter(category=category).order_by('-created_at')
-
-    return render(request, 'blog/post_list.html', {
-        'posts': posts,
-        'category': category
-    })
