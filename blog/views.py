@@ -55,8 +55,8 @@ def posts_by_category(request, slug):
     })
 
 
-def post_detail(request, id):
-    post = get_object_or_404(BlogPost, id=id)
+def post_detail(request, slug):
+    post = get_object_or_404(BlogPost, slug=slug)
     return render(request, 'blog/post_detail.html', {'post': post})
 
 
